@@ -3,9 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Hey!</title>
 </head>
 <body>
-    
+    <script>
+        // Function to get URL parameter by name
+        function getParameterByName(name, url = window.location.href) {
+            name = name.replace(/[\[\]]/g, '\\$&');
+            const regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)');
+            const results = regex.exec(url);
+            if (!results) return null;
+            if (!results[2]) return '';
+            return decodeURIComponent(results[2].replace(/\+/g, ' '));
+        }
+
+        // Function to set a cookie
+        function setCookie(name, value, days) {
+            const d = new Date();
+            d.setTime(d.getTime() + (days*24*60*60*1000));
+            const expires = "expires=" + d.toUTCString();
+            document.cookie = name + "=" + value + ";" + expires + ";path=/";
+        }
+
+        // Function to get a cookie by name
+        function getCookie(name) {
+            const nameEQ = name + "=";
+            const ca = document.cookie.split(';');
+            for (let i = 0; i < ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+                if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+            }
+            return null;
+        }
+
+        // Function to convert HWID to key
+        function hwidToKey(hwid) {
+            let step1 = hwid.split('').reverse().join('');
+            let step2 = 0;
+            for (let i = 0; i < step1.length; i++) {
+                const v = step1[i];
+                step2 = (step2 + v.charCodeAt(0) * 1000003 * (1 / v.charCodeAt(0))) * 2;
+            }
+            return step2;
+        }
+
+        // Get the HWID from the URL
+        const hwid = getParameterByName('hash');
+        if (hwid) {
+            // Save HWID in cookies
+            setCookie('hwid', hwid, 7);
+            // Redirect to Linkvertise link
+            window.location.href = 'https://linkvertise.com/redirect?url=https://your-site.com?param=xY72dZhf6d';
+        } else {
+            // Check if coming back from Linkvertise
+            const param = getParameterByName('param');
+            if (param === 'xY72dZhf6d') {
+                const storedHwid = getCookie('hwid');
+                if (storedHwid) {
+                    const key = hwidToKey(storedHwid);
+                    alert('Your key is: ' + key);
+                } else {
+                    alert('HWID not found in cookies.');
+                }
+            }
+        }
+    </script>
 </body>
 </html>
